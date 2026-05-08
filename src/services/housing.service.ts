@@ -1,17 +1,17 @@
-import { FamilyProfileModel } from '../models/FamilyProfile.js';
-import { HousingApplicationModel } from '../models/HousingApplication.js';
+import {
+  createHousingApplicationRecord,
+  getFamilyProfileRecord,
+  listHousingApplicationRecords,
+  upsertFamilyProfileRecord,
+} from '../repositories/housing.repository.js';
 import { microservicesClient } from './microservicesClient.js';
 
 export async function upsertFamilyProfile(userId: string, payload: any) {
-  return FamilyProfileModel.findOneAndUpdate({ userId }, payload, {
-    new: true,
-    upsert: true,
-    setDefaultsOnInsert: true,
-  });
+  return upsertFamilyProfileRecord(userId, payload);
 }
 
 export async function getFamilyProfile(userId: string) {
-  return FamilyProfileModel.findOne({ userId });
+  return getFamilyProfileRecord(userId);
 }
 
 export async function matchHousing(userId: string, payload: any) {
@@ -20,14 +20,9 @@ export async function matchHousing(userId: string, payload: any) {
 }
 
 export async function createHousingApplication(userId: string, payload: any) {
-  return HousingApplicationModel.create({
-    ...payload,
-    userId,
-    status: 'submitted',
-    submittedAt: new Date(),
-  });
+  return createHousingApplicationRecord(userId, payload);
 }
 
 export async function listHousingApplications(userId: string) {
-  return HousingApplicationModel.find({ userId }).sort({ submittedAt: -1 });
+  return listHousingApplicationRecords(userId);
 }

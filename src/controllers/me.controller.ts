@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
-import { UserModel } from '../models/User.js';
+import { getUserById } from '../repositories/user.repository.js';
 
 export async function getMe(req: Request, res: Response): Promise<void> {
-  const userRecord = await UserModel.findOne({ firebaseUid: req.user?.uid });
+  const userRecord = req.user?.uid ? await getUserById(req.user.uid) : null;
 
   res.json({
     user: {

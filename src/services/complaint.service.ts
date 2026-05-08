@@ -1,9 +1,14 @@
-import { ComplaintModel } from '../models/Complaint.js';
+import {
+  createComplaintRecord,
+  getComplaintRecord,
+  listComplaintRecords,
+  type ComplaintRecord,
+} from '../repositories/complaint.repository.js';
 import { ApiError } from '../utils/ApiError.js';
 import { microservicesClient } from './microservicesClient.js';
 
 export async function createComplaint(userId: string, payload: any) {
-  const complaint = await ComplaintModel.create({
+  const complaint = await createComplaintRecord({
     ...payload,
     userId,
     status: 'pending',
@@ -22,18 +27,18 @@ export async function listComplaints(user: Express.Request['user']) {
   }
 
   if (user.role === 'admin') {
-    return ComplaintModel.find().sort({ createdAt: -1 });
+    return listComplaintRecords();
   }
 
   if (user.role === 'officer') {
-    return ComplaintModel.find({ routedTo: user.uid }).sort({ createdAt: -1 });
+    return listComplaintRecords({ routedTo: user.uid });
   }
 
-  return ComplaintModel.find({ userId: user.uid }).sort({ createdAt: -1 });
+  return listComplaintRecords({ userId: user.uid });
 }
 
 export async function getComplaintForUser(complaintId: string, user: Express.Request['user']) {
-  const complaint = await ComplaintModel.findById(complaintId);
+  const complaint = await getComplaintRecord(complaintId);
   if (!complaint) {
     throw new ApiError(404, 'NotFound', 'Complaint not found');
   }
@@ -44,3 +49,5 @@ export async function getComplaintForUser(complaintId: string, user: Express.Req
 
   throw new ApiError(403, 'Forbidden', 'You do not have permission to access this complaint');
 }
+
+export type { ComplaintRecord };

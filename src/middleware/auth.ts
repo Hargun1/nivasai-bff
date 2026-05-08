@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { firebaseAdmin } from '../config/firebaseAdmin.js';
-import { UserModel } from '../models/User.js';
+import { upsertUserFromAuth } from '../repositories/user.repository.js';
 import { ApiError } from '../utils/ApiError.js';
 
 export async function requireAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
@@ -17,21 +17,11 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
     }
 
     const decoded = await firebaseAdmin.auth().verifyIdToken(token);
-    const user = await UserModel.findOneAndUpdate(
-      { firebaseUid: decoded.uid },
-      {
-        $setOnInsert: {
-          firebaseUid: decoded.uid,
-          phone: decoded.phone_number,
-          email: decoded.email,
-          role: 'resident',
-        },
-        $set: {
-          lastLoginAt: new Date(),
-        },
-      },
-      { new: true, upsert: true }
-    );
+    const user = await upsertUserFromAuth({
+      uid: decoded.uid,
+      phone: decoded.phone_number,
+      email: decoded.email,
+    });
 
     req.user = {
       uid: decoded.uid,

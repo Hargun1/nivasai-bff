@@ -3,7 +3,11 @@ import { connectMongo } from './config/mongo.js';
 import { env } from './config/env.js';
 
 async function bootstrap(): Promise<void> {
-  await connectMongo();
+  if (env.MONGO_URI) {
+    await connectMongo();
+  } else {
+    console.log('MongoDB not configured; using Firestore as primary datastore');
+  }
 
   const app = createApp();
   app.listen(env.PORT, () => {

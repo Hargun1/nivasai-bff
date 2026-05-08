@@ -6,7 +6,7 @@ dotenv.config();
 const envSchema = z.object({
   PORT: z.coerce.number().default(4000),
   FRONTEND_ORIGIN: z.string().default('http://localhost:5173'),
-  MONGO_URI: z.string().min(1, 'MONGO_URI is required'),
+  MONGO_URI: z.string().optional(),
   FIREBASE_PROJECT_ID: z.string().optional(),
   FIREBASE_CLIENT_EMAIL: z.string().optional(),
   FIREBASE_PRIVATE_KEY: z.string().optional(),

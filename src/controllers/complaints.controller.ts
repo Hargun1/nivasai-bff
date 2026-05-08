@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
-import { ComplaintModel } from '../models/Complaint.js';
 import { ApiError } from '../utils/ApiError.js';
 import { createComplaint, getComplaintForUser, listComplaints } from '../services/complaint.service.js';
 import { microservicesClient } from '../services/microservicesClient.js';
+import { updateComplaintRecord } from '../repositories/complaint.repository.js';
 
 export async function postComplaint(req: Request, res: Response): Promise<void> {
   if (!req.user) {
@@ -30,11 +30,7 @@ export async function patchComplaintStatus(req: Request, res: Response): Promise
     throw new ApiError(403, 'Forbidden', 'Residents can update only their own complaints');
   }
 
-  const updated = await ComplaintModel.findByIdAndUpdate(
-    complaint.id,
-    { status: req.body.status },
-    { new: true }
-  );
+  const updated = await updateComplaintRecord(complaint.id, { status: req.body.status });
 
   res.json({ complaint: updated });
 }
